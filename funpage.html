@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Developer Club</title>
+
+  <style>
+    :root {
+      --bg1: #0f172a;
+      --bg2: #111827;
+      --card: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.18);
+      --text: #e5e7eb;
+      --muted: #cbd5e1;
+      --yes: #22c55e;
+      --yesHover: #16a34a;
+      --no: #ef4444;
+      --shadow: 0 20px 60px rgba(0,0,0,0.45);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: radial-gradient(1200px 600px at 20% 10%, #1d4ed8 0%, transparent 55%),
+                  radial-gradient(900px 500px at 80% 30%, #9333ea 0%, transparent 55%),
+                  linear-gradient(135deg, var(--bg1), var(--bg2));
+      overflow: hidden;
+    }
+
+    .card {
+      width: min(720px, 92vw);
+      padding: 28px 24px;
+      border-radius: 18px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      position: relative;
+    }
+
+    h1 {
+      margin: 0 0 10px 0;
+      font-size: clamp(24px, 4vw, 40px);
+      letter-spacing: 0.2px;
+    }
+
+    p {
+      margin: 0 0 22px 0;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    /* Button area */
+    .arena {
+      position: relative;
+      height: 160px;
+      border-radius: 14px;
+      border: 1px dashed rgba(255,255,255,0.18);
+      background: rgba(0,0,0,0.15);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    button {
+      border: 0;
+      padding: 14px 22px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      transition: transform 0.12s ease, background 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      user-select: none;
+    }
+
+    #yesBtn {
+      background: var(--yes);
+      color: #052e16;
+    }
+    #yesBtn:hover {
+      background: var(--yesHover);
+      transform: translateY(-1px) scale(1.02);
+    }
+
+    /* NO button starts static, becomes absolute when user tries to interact */
+    #noBtn {
+      background: var(--no);
+      color: #fff;
+    }
+    #noBtn.runaway {
+      position: absolute;
+      left: 55%;
+      top: 55%;
+      transform: translate(-50%, -50%);
+      transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                  top 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                  transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #result {
+      display: none;
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px solid rgba(34,197,94,0.35);
+      background: rgba(34,197,94,0.12);
+    }
+
+    #result h2 {
+      margin: 0 0 10px 0;
+      font-size: 22px;
+    }
+
+    .resultWrap {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .resultWrap img {
+      width: 140px;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(0,0,0,0.2);
+    }
+
+    .hint {
+      margin-top: 10px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.6);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h1>Nisha, will you be my Valentine? 💕</h1>
+    <!-- <p>Choose wisely. (Tip: the NO button is… shy 😄)</p> -->
+
+    <div class="arena" id="arena">
+      <button id="yesBtn">YES</button>
+      <button id="noBtn" aria-label="No (good luck clicking)">NO</button>
+    </div>
+
+    <div id="result">
+      <div class="resultWrap">
+        <!-- You can replace this image with anything you like -->
+        <img
+          id="clubImg"
+          src="https://img.freepik.com/premium-photo/full-body-photo-happy-man-pink-suit-sunglasses-dancing-blue-background_176697-14124.jpg"
+          alt="Dance"
+        />
+        <div>
+          <h2>YAY !!!</h2>
+          <p>🔥Best decision ever! I Love You ❤️ </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- <div class="hint">
+      Want it even harder to click NO? I can make it teleport faster 😈
+    </div> -->
+  </div>
+
+  <script>
+    const arena = document.getElementById("arena");
+    const noBtn = document.getElementById("noBtn");
+    const yesBtn = document.getElementById("yesBtn");
+    const result = document.getElementById("result");
+
+    // Helper: random integer in range
+    const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+    function moveNoButtonAwayFromCursor(event) {
+      // Make button absolute on first hover
+      if (!noBtn.classList.contains('runaway')) {
+        noBtn.classList.add('runaway');
+      }
+      
+      const arenaRect = arena.getBoundingClientRect();
+      const btnRect = noBtn.getBoundingClientRect();
+      const yesBtnRect = yesBtn.getBoundingClientRect();
+
+      // Keep button fully inside arena
+      const padding = 10;
+      const maxLeft = arenaRect.width - btnRect.width - padding;
+      const maxTop = arenaRect.height - btnRect.height - padding;
+
+      // Helper to check if NO button overlaps with YES button
+      function overlapsYes(left, top) {
+        const yesLeft = yesBtnRect.left - arenaRect.left;
+        const yesTop = yesBtnRect.top - arenaRect.top;
+        const yesRight = yesLeft + yesBtnRect.width;
+        const yesBottom = yesTop + yesBtnRect.height;
+        
+        const noRight = left + btnRect.width;
+        const noBottom = top + btnRect.height;
+        
+        // Add 10px buffer to prevent near-overlaps
+        const buffer = 10;
+        return !(left > yesRight + buffer || 
+                 noRight < yesLeft - buffer || 
+                 top > yesBottom + buffer || 
+                 noBottom < yesTop - buffer);
+      }
+
+      // Random new position (within bounds and not overlapping YES)
+      let newLeft, newTop;
+      let attempts = 0;
+      do {
+        newLeft = rand(padding, Math.max(padding, maxLeft));
+        newTop  = rand(padding, Math.max(padding, maxTop));
+        attempts++;
+      } while (overlapsYes(newLeft, newTop) && attempts < 20);
+
+      // Extra logic: if cursor is near the new position, reroll once
+      const cursorX = event.clientX - arenaRect.left;
+      const cursorY = event.clientY - arenaRect.top;
+
+      const distance = Math.hypot(cursorX - newLeft, cursorY - newTop);
+      if (distance < 120) {
+        let retryLeft, retryTop;
+        attempts = 0;
+        do {
+          retryLeft = rand(padding, Math.max(padding, maxLeft));
+          retryTop  = rand(padding, Math.max(padding, maxTop));
+          attempts++;
+        } while (overlapsYes(retryLeft, retryTop) && attempts < 20);
+        
+        if (!overlapsYes(retryLeft, retryTop)) {
+          newLeft = retryLeft;
+          newTop = retryTop;
+        }
+      }
+
+      noBtn.style.left = `${newLeft}px`;
+      noBtn.style.top = `${newTop}px`;
+      noBtn.style.transform = `translate(0, 0)`;
+    }
+
+    // Make NO "un-clickable"
+    noBtn.addEventListener("mouseenter", moveNoButtonAwayFromCursor);
+    noBtn.addEventListener("mousemove", moveNoButtonAwayFromCursor);
+    noBtn.addEventListener("click", (e) => {
+      // In case someone manages to click via keyboard or crazy speed :)
+      e.preventDefault();
+      moveNoButtonAwayFromCursor({ clientX: rand(0, 999), clientY: rand(0, 999) });
+    });
+
+    // YES behavior
+    yesBtn.addEventListener("click", () => {
+      result.style.display = "block";
+      // Optional: disable buttons after accepting
+      yesBtn.disabled = true;
+      yesBtn.style.opacity = "0.7";
+      yesBtn.style.cursor = "default";
+
+      // Hide NO after YES is clicked (optional)
+      noBtn.style.display = "none";
+
+      // Smooth scroll to message (nice on mobile)
+      result.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+
+    // NO button starts inline, no need for initial positioning
+  </script>
+</body>
+</html>
+``
